@@ -159,13 +159,13 @@ function search(curr, key) {
     msg = 'Searching for ' + key + ' : ' + key + ' < ' + curr.data + '. Looking at left subtree.';
     self.postMessage([root, msg, '']);
     sleep(delay);
-    search(curr.left, key);
+    return search(curr.left, key);
   }
   else if (key > curr.data) { // if key > current node's data then look at the right subtree
     msg = 'Searching for ' + key + ' : ' + key + ' > ' + curr.data + '. Looking at right subtree.';
     self.postMessage([root, msg, '']);
     sleep(delay);
-    search(curr.right, key);
+    return search(curr.right, key);
   }
   else { // notify the main thread that an element is found and highlight that element
     msg = 'Searching for ' + key + ' : ' + key + ' == ' + curr.data + '. Element found!';
@@ -177,6 +177,8 @@ function search(curr, key) {
 
 function findSplay(curr, key) {
   let p = search(curr, key);
+  console.log(curr.data);
+  console.log(p.data);
   return this.splay(curr, p);
 }
 
