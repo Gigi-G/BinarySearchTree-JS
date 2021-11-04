@@ -98,7 +98,7 @@ function comparator(a, b) {
   return a > b ? 1 : a < b ? -1 : 0;
 }
 
-function rotate(root, x) {
+function rotate(curr, x) {
   let p = x.parent;
   let b = null;
   if (x === p.left) {
@@ -120,19 +120,19 @@ function rotate(root, x) {
       x.parent.right = x;
     }
   } else {
-    root = x;
+    curr = x;
   }
-  return root;
+  return curr;
 }
 
-function splay(root, x) {
+function splay(curr, x) {
   while (x.parent) {
     let p = x.parent;
     let g = p.parent;
-    if (g) this.rotate(root, (x === p.left) === (p === g.left) ? p : x);
-    root = this.rotate (root, x);
+    if (g) this.rotate(curr, (x === p.left) === (p === g.left) ? p : x);
+    curr = this.rotate(curr, x);
   }
-  return root;
+  return curr;
 }
 
 // SEARCH AN ELEMENT IN THE TREE
@@ -167,7 +167,8 @@ function search(curr, key) {
 
 function findSplay(curr, key) {
   let p = search(curr, key);
-  return this.splay(curr, p);
+  this.splay(curr, p);
+  return p;
 }
 
 // DELETE AN ELEMENT FROM THE TREE
