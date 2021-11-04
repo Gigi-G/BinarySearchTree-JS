@@ -165,10 +165,10 @@ function search(curr, key) {
   return curr;
 }
 
-function findSplay(key) {
-  let p = search(this.root, key);
-  this.root = this.splay(this.root, p);
-  return this.comparator(key, p.data) === 0;
+function findSplay(curr, key) {
+  let p = search(curr, key);
+  root = this.splay(curr, p);
+  return root;
 }
 
 // DELETE AN ELEMENT FROM THE TREE
@@ -492,7 +492,8 @@ self.addEventListener('message', (event) => {
       }
       else {
         //search(root, key);
-        findSplay(key);
+        findSplay(root, key);
+        updatePosition(root);
         unhighlightAll(root); // unhighlight all nodes
         self.postMessage([root, msg, 'Finished']); // let main thread know that operation has finished
       }
