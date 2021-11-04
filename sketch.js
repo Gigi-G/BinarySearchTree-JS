@@ -272,7 +272,9 @@ function setup() {
   // END VISUALIZATION CONTROLS STUFF
 
   // SET CANVAS AND TEXT SIZE
-  const canvas = createCanvas(1024, 500);
+  var w = window.innerWidth-200;
+  var h = window.innerHeight-258;
+  const canvas = createCanvas(w, h);
   canvas.parent('mainContent');
   textSize(15);
 }
@@ -284,4 +286,11 @@ function draw() {
   textAlign(LEFT);
   text(lastMsg, 30, 50);
   text(printOutput, 30, 70);
+}
+
+window.onresize = function() {
+  // assigns new values for width and height variables
+  w = window.innerWidth-200;
+  h = window.innerHeight-258;  
+  resizeCanvas(w, h);
 }
