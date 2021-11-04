@@ -36,6 +36,7 @@ let msg = '';
 let printOutput = '';
 let canvasWidth;
 let delay = 1000;
+let comparator = (a, b) => a > b ? 1 : a < b ? -1 : 0;
 
 class Node {
   constructor(d, height, y, parent, loc) {
@@ -94,6 +95,43 @@ function getHeight(node) {
   return node.height;
 }
 
+function rotate (root, x) {
+  let p = x.parent;
+  let b = null;
+  if (x === p.left) {
+    p.left = b = x.right;
+    x.right = p;
+  } else {
+    p.right = b = x.left;
+    x.left = p;
+  }
+  x.parent = p.parent;
+  p.parent = x;
+  if (b) {
+    b.parent = p;
+  }
+  if (x.parent) {
+    if (p === x.parent.left) {
+      x.parent.left = x;
+    } else {
+      x.parent.right = x;
+    }
+  } else {
+    root = x;
+  }
+  return root;
+}
+
+function splay (root, x) {
+  while (x.parent) {
+    let p = x.parent;
+    let g = p.parent;
+    if (g) this.rotate(root, (x === p.left) === (p === g.left) ? p : x);
+    root = this.rotate (root, x);
+  }
+  return root;
+}
+
 // SEARCH AN ELEMENT IN THE TREE
 function search(curr, key) {
   if (!curr) { // if current node is null then element does not exist in the tree
@@ -121,7 +159,13 @@ function search(curr, key) {
     self.postMessage([root, msg, '']);
     sleep(delay);
   }
-  return 0;
+  return curr;
+}
+
+function findSplay(key) {
+  let p = search(this.root, key);
+  this.root = this.splay(this.root, p);
+  return this.comparator(key, p.data) === 0;
 }
 
 // DELETE AN ELEMENT FROM THE TREE
@@ -444,7 +488,8 @@ self.addEventListener('message', (event) => {
         self.postMessage([root, 'Tree is empty', 'Finished']); // send message to main thread that the tree is empty
       }
       else {
-        search(root, key);
+        //search(root, key);
+        findSplay(key);
         unhighlightAll(root); // unhighlight all nodes
         self.postMessage([root, msg, 'Finished']); // let main thread know that operation has finished
       }
