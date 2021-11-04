@@ -36,7 +36,6 @@ let msg = '';
 let printOutput = '';
 let canvasWidth;
 let delay = 1000;
-let comparator = (a, b) => a > b ? 1 : a < b ? -1 : 0;
 
 class Node {
   constructor(d, height, y, parent, loc) {
@@ -95,7 +94,11 @@ function getHeight(node) {
   return node.height;
 }
 
-function rotate (root, x) {
+function comparator(a, b) {
+  return a > b ? 1 : a < b ? -1 : 0;
+}
+
+function rotate(root, x) {
   let p = x.parent;
   let b = null;
   if (x === p.left) {
@@ -122,7 +125,7 @@ function rotate (root, x) {
   return root;
 }
 
-function splay (root, x) {
+function splay(root, x) {
   while (x.parent) {
     let p = x.parent;
     let g = p.parent;
