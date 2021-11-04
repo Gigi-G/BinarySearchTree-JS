@@ -131,6 +131,7 @@ function rotate(curr, x) {
     curr = x;
     curr.loc = x.loc;
   }
+  console.log(curr.data);
   return curr;
 }
 
@@ -176,8 +177,7 @@ function search(curr, key) {
 
 function findSplay(curr, key) {
   let p = search(curr, key);
-  this.splay(curr, p);
-  return p;
+  return this.splay(curr, p);
 }
 
 // DELETE AN ELEMENT FROM THE TREE
@@ -503,6 +503,7 @@ self.addEventListener('message', (event) => {
         //search(root, key);
         root = findSplay(root, key);
         updatePosition(root);
+        console.log(root.data);
         unhighlightAll(root); // unhighlight all nodes
         self.postMessage([root, msg, 'Finished']); // let main thread know that operation has finished
       }
