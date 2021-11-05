@@ -103,33 +103,24 @@ function rotate(curr, x) {
   let b = null;
   if (x === p.left) {
     p.left = b = x.right;
-    p.left.loc = b.loc= x.right.loc;
     x.right = p;
-    x.right.loc = p.loc;
   } else {
     p.right = b = x.left;
-    p.right.loc = b.loc = x.left.loc;
     x.left = p;
-    x.left.loc = p.loc;
   }
   x.parent = p.parent;
-  x.parent.loc = p.parent.loc;
   p.parent = x;
-  p.parent.loc = x.loc;
   if (b) {
     b.parent = p;
   }
   if (x.parent) {
     if (p === x.parent.left) {
       x.parent.left = x;
-      x.parent.left.loc = x.loc;
     } else {
       x.parent.right = x;
-      x.parent.right.loc = x.loc;
     }
   } else {
     curr = x;
-    curr.loc = x.loc;
   }
   console.log(curr.data);
   return curr;
