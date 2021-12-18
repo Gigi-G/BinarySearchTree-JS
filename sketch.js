@@ -45,6 +45,10 @@ let insertForm;
 let insertButton;
 let deleteForm;
 let deleteButton;
+let insertSForm;
+let insertSButton;
+let deleteSForm;
+let deleteSButton;
 let searchForm;
 let searchButton;
 let printInOrderButton;
@@ -64,6 +68,10 @@ function enableUI() {
   insertButton.removeAttribute('disabled');
   deleteForm.removeAttribute('disabled');
   deleteButton.removeAttribute('disabled');
+  insertSForm.removeAttribute('disabled');
+  insertSButton.removeAttribute('disabled');
+  deleteSForm.removeAttribute('disabled');
+  deleteSButton.removeAttribute('disabled');
   searchForm.removeAttribute('disabled');
   searchButton.removeAttribute('disabled');
   printPreOrderButton.removeAttribute('disabled');
@@ -78,6 +86,10 @@ function disableUI() {
   insertButton.attribute('disabled', '');
   deleteForm.attribute('disabled', '');
   deleteButton.attribute('disabled', '');
+  insertSForm.attribute('disabled', '');
+  insertSButton.attribute('disabled', '');
+  deleteSForm.attribute('disabled', '');
+  deleteSButton.attribute('disabled', '');
   searchForm.attribute('disabled', '');
   searchButton.attribute('disabled', '');
   printPreOrderButton.attribute('disabled', '');
@@ -185,6 +197,23 @@ function insert() {
   return 0;
 }
 
+function insertSplay() {
+  lastMsg = '';
+  printOutput = '';
+  value = parseInt(insertSForm.value(), 10);
+  insertSForm.value('');
+  if (isNaN(value) === true) return undefined;
+  disableUI();
+  payload = ['InsertSplay', value, width];
+  BST.postMessage(payload); // send message 'InsertSplay', inputted value and canvas width to ask the Tree to insert new element
+  BST.onmessage = function (event) {
+    tree = event.data[0]; // receive our tree modifications from the BST so the browser's main thread can display changes at each step in the algo instead of the final change
+    lastMsg = event.data[1]; // also receive message from the BST after each step in the algorithm is done
+    if (event.data[2] === 'Finished') enableUI();
+  };
+  return 0;
+}
+
 function del() {
   lastMsg = '';
   printOutput = '';
@@ -194,6 +223,23 @@ function del() {
   disableUI();
   payload = ['Delete', value];
   BST.postMessage(payload); // send message 'Delete' and inputted value to ask the Tree to delete an element
+  BST.onmessage = function (event) {
+    tree = event.data[0]; // receive our tree modifications from the BST so the browser's main thread can display changes at each step in the algo instead of the final change
+    lastMsg = event.data[1]; // also receive message from the BST after each step in the algorithm is done
+    if (event.data[2] === 'Finished') enableUI();
+  };
+  return 0;
+}
+
+function delSplay() {
+  lastMsg = '';
+  printOutput = '';
+  value = parseInt(deleteSForm.value(), 10);
+  deleteSForm.value('');
+  if (isNaN(value) === true) return undefined;
+  disableUI();
+  payload = ['DeleteSplay', value];
+  BST.postMessage(payload); // send message 'DeleteSplay' and inputted value to ask the Tree to delete an element
   BST.onmessage = function (event) {
     tree = event.data[0]; // receive our tree modifications from the BST so the browser's main thread can display changes at each step in the algo instead of the final change
     lastMsg = event.data[1]; // also receive message from the BST after each step in the algorithm is done
@@ -258,25 +304,29 @@ function setup() {
   controlBar = createElement('table');
   controlDiv.child(controlBar);
   insertForm = addControls('Input', '', '');
-  insertButton = addControls('Button', 'Insert', insert);
+  insertButton = addControls('Button', 'Insert Natural', insert);
+  insertSForm = addControls('Input', '', '');
+  insertSButton = addControls('Button', 'Insert Splay', insertSplay);
   deleteForm = addControls('Input', '', '');
-  deleteButton = addControls('Button', 'Delete', del);
+  deleteButton = addControls('Button', 'Delete Natural', del);
+  deleteSForm = addControls('Input', '', '');
+  deleteSButton = addControls('Button', 'Delete Splay', delSplay);
   searchForm = addControls('Input', '', '');
   searchButton = addControls('Button', 'Find', find);
-  printPreOrderButton = addControls('Button', 'Print Pre Order', printPreOrder);
-  printInOrderButton = addControls('Button', 'Print In Order', printInOrder);
-  printPostOrderButton = addControls('Button', 'Print Post Order', printPostOrder);
+  printPreOrderButton = addControls('Button', 'Pre Order', printPreOrder);
+  printInOrderButton = addControls('Button', 'In Order', printInOrder);
+  printPostOrderButton = addControls('Button', 'Post Order', printPostOrder);
   undoButton = addControls('Button', 'Undo', undo);
   animationSpeedSliderLabel = addControls('Label', 'Animation Speed:', '');
   animationSpeedSlider = addControls('Slider', '', setAnimSpeed);
   // END VISUALIZATION CONTROLS STUFF
 
   // SET CANVAS AND TEXT SIZE
-  var w = window.innerWidth-200;
-  var h = window.innerHeight-258;
+  var w = document.documentElement.clientWidth;
+  var h = document.documentElement.clientHeight / 1.3;
   const canvas = createCanvas(w, h);
   canvas.parent('mainContent');
-  textSize(15);
+  textSize(11);
 }
 
 function draw() {
@@ -290,7 +340,7 @@ function draw() {
 
 window.onresize = function() {
   // assigns new values for width and height variables
-  w = window.innerWidth-200;
-  h = window.innerHeight-258;  
+  w = document.documentElement.clientWidth;
+  h = document.documentElement.clientHeight / 1.3;
   resizeCanvas(w, h);
 }

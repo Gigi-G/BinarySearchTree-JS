@@ -98,79 +98,204 @@ function comparator(a, b) {
   return a > b ? 1 : a < b ? -1 : 0;
 }
 
-function rotate(curr, x) {
-  let p = x.parent;
-  let b = null;
-  if (x === p.left) {
-    p.left = b = x.right;
-    x.right = p;
-  } else {
-    p.right = b = x.left;
-    x.left = p;
+
+function rightRotate(node) {
+  let y = node;
+  let yParent = node.parent;
+  let x = y.left;
+  let T2 = x.right;
+
+
+  x.right = y;
+  y.loc = "right";
+  y.parent = x;
+
+  y.left = T2;
+
+  if (T2 != null) {
+    T2.parent = y;
+    T2.loc = "left";
   }
-  x.parent = p.parent;
-  p.parent = x;
-  if (b) {
-    b.parent = p;
-  }
-  if (x.parent) {
-    if (p === x.parent.left) {
+
+  x.parent = yParent;
+
+  if (x.parent != null) {
+    if (x.parent.left == y) {
       x.parent.left = x;
-    } else {
-      x.parent.right = x;
+      x.loc = "left";
     }
-  } else {
-    curr = x;
+    else {
+      x.parent.right = x;
+      x.loc = "right";
+    }
   }
-  console.log(curr.data);
-  return curr;
+  return x;
+
 }
 
-function splay(curr, x) {
-  while (x.parent) {
-    let p = x.parent;
-    let g = p.parent;
-    if (g) this.rotate(curr, (x === p.left) === (p === g.left) ? p : x);
-    curr = this.rotate(curr, x);
+function leftRotate(node) {
+  let x = node;
+  let xParent = node.parent;
+  let y = x.right;
+  let T2 = y.left;
+
+  y.left = x;
+  x.loc = "left";
+  x.parent = y;
+
+  x.right = T2;
+
+  if (T2 != null) {
+    T2.loc = "right";
+    T2.parent = x;
   }
-  return curr;
+
+  y.parent = xParent;
+
+  if (y.parent != null) {
+    if (y.parent.left == x) {
+      y.parent.left = y;
+      y.loc = "left";
+    }
+    else {
+      y.parent.right = y;
+      y.loc = "right";
+    }
+  }
+  return y;
 }
 
-// SEARCH AN ELEMENT IN THE TREE
-function search(curr, key) {
-  if (!curr) { // if current node is null then element does not exist in the tree
+
+function splay(curr) {
+  if (curr == root || curr == null)
+    return;
+
+
+  //pictorial help for cases: https://www.geeksforgeeks.org/splay-tree-set-1-insert/
+
+  //zig case
+  if (curr.parent == root) {
+    if (curr.parent.left == curr)
+      root = rightRotate(root);
+    else
+      root = leftRotate(root);
+
+    root.loc = "root";
+    return;
+  }//end of zig case
+
+  //zig zig case
+  else if (curr.parent.left == curr && curr.parent.parent.left == curr.parent) {
+    if (curr.parent.parent == root) {
+      //root ptr of tree will be passed by reference, so root ptr of tree will also change.
+      root = rightRotate(root);
+      root.loc = "root";
+      root = rightRotate(root);
+      root.loc = "root";
+      return;
+    }
+    else {
+      curr.parent = rightRotate(curr.parent.parent);
+      curr = rightRotate(curr.parent);
+      splay(curr);
+      return;
+    }
+  } //end of zig zig case
+
+  //zag zag case
+  else if (curr.parent.right == curr && curr.parent.parent.right == curr.parent) {
+    if (curr.parent.parent == root) {
+      root = leftRotate(root);
+      root.loc = "root";
+      root = leftRotate(root);
+      root.loc = "root";
+      return;
+    }
+    else {
+      curr.parent = leftRotate(curr.parent.parent);
+      curr = leftRotate(curr.parent);
+      splay(curr);
+      return;
+    }
+  } //end of zag zag case
+
+  //zag-zig cases
+  else if (curr.parent.right == curr && curr.parent.parent.left == curr.parent) {
+    curr = leftRotate(curr.parent);
+
+    if (curr.parent == root) {
+      root = rightRotate(root);
+      root.loc = "root";
+      return;
+    }
+    else {
+      curr = rightRotate(curr.parent);
+      splay(curr);
+      return;
+
+    }
+  } //end of zag zig case
+
+  //zig zag case
+  else if (curr.parent.left == curr && curr.parent.parent.right == curr.parent) {
+    curr = rightRotate(curr.parent);
+
+    if (curr.parent == root) {
+      root = leftRotate(root);
+      root.loc = "root";
+      return;
+    }
+    else {
+      curr = leftRotate(curr.parent);
+      splay(curr);
+      return;
+
+    }
+
+  }
+}//end of splay function
+
+// SEARCH AN ELEMENT IN THE SPLAY TREE
+function search(node, key) {
+  if(node == null) return;
+  unhighlightAll(root);
+  node.highlighted = true;
+  self.postMessage([root, msg, '']);
+  if (node.data == key) { //key has been found, so splay the node containing this key, and then return the pointer to the value.
+    msg = 'Searching for ' + key + ' : ' + key + ' == ' + node.data + '. Element found!';
+    self.postMessage([root, msg, '']);
+    sleep(delay);
+    splay(node)
+    return root;
+  }
+
+  if (node.left == null && key < node.data) { //key does not exist so splay the last accessed node
     msg = 'Searching for ' + key + ' : (Element not found)';
     self.postMessage([root, msg, '']);
-    return 0;
+    splay(node);
+    return null;
   }
-  unhighlightAll(root);
-  curr.highlighted = true;
-  self.postMessage([root, msg, '']);
-  if (key < curr.data) { // if key < current node's data then look at the left subtree
-    msg = 'Searching for ' + key + ' : ' + key + ' < ' + curr.data + '. Looking at left subtree.';
-    self.postMessage([root, msg, '']);
-    sleep(delay);
-    return search(curr.left, key);
-  }
-  else if (key > curr.data) { // if key > current node's data then look at the right subtree
-    msg = 'Searching for ' + key + ' : ' + key + ' > ' + curr.data + '. Looking at right subtree.';
-    self.postMessage([root, msg, '']);
-    sleep(delay);
-    return search(curr.right, key);
-  }
-  else { // notify the main thread that an element is found and highlight that element
-    msg = 'Searching for ' + key + ' : ' + key + ' == ' + curr.data + '. Element found!';
-    self.postMessage([root, msg, '']);
-    sleep(delay);
-  }
-  return curr;
-}
 
-function findSplay(curr, key) {
-  let p = search(curr, key);
-  console.log(curr.data);
-  console.log(p.data);
-  return this.splay(curr, p);
+  else if (node.right == null && key > node.data) { //key does not exist so splay the last accessed node
+    msg = 'Searching for ' + key + ' : (Element not found)';
+    self.postMessage([root, msg, '']);
+    splay(node);
+    return null;
+  }
+
+  else if (key < node.data) {
+    msg = 'Searching for ' + key + ' : ' + key + ' < ' + node.data + '. Looking at right subtree.';
+    self.postMessage([root, msg, '']);
+    sleep(delay);
+    return search(node.left, key);
+  }
+
+  else {
+    msg = 'Searching for ' + key + ' : ' + key + ' > ' + node.data + '. Looking at right subtree.';
+    self.postMessage([root, msg, '']);
+    sleep(delay);
+    return search(node.right, key);
+  }
 }
 
 // DELETE AN ELEMENT FROM THE TREE
@@ -301,6 +426,14 @@ function pop(startingNode, key) {
   return node; // return the modifications back to the caller
 }
 
+function deleteKey(curr, key) {
+  search(curr, key);
+  updatePosition(root);
+  unhighlightAll(root);
+  sleep(delay);
+  return pop(root, key);
+}
+
 // INSERT AN ELEMENT TO THE TREE
 function push(node, data, posY, parent, loc) {
   let curr = node;
@@ -332,6 +465,91 @@ function push(node, data, posY, parent, loc) {
   curr.height = Math.max(getHeight(curr.left), getHeight(curr.right)) + 1; // update the heights of all nodes traversed by the push() function
 
   return curr; // return the modifications back to the caller
+}
+
+// INSERT AN ELEMENT TO THE SPLAY TREE
+function insert(node, key, posY) {
+  if (node == null) {
+    msg = 'Found a null root. Inserted ' + key + '.';
+    self.postMessage([root, msg, '']);
+    root = new Node(key, 1, posY, null, 'root');
+    return;
+  }
+  else {
+    node.highlighted = true;
+    msg = "";
+    self.postMessage([root, msg, '']);
+  }
+
+  if (node.left == null && node.data > key) {
+    sleep(delay);
+    msg = 'Inserted ' + key + ' and apply splay(' + key + ').';
+    self.postMessage([root, msg, '']);
+    node.highlighted = false;
+    splay(node);
+    let l = new Node(
+      key,
+      1,
+      posY + 40,
+      node,
+      'left'
+    );
+    if(node.left) {
+      node.left.parent = l;
+      l.left = node.left;
+    }
+    node.left = l;
+    splay(l);
+    return;
+  }
+
+  else if (node.right == null && key > node.data) {
+    sleep(delay);
+    msg = 'Inserted ' + key + ' and apply splay(' + key + ').';
+    self.postMessage([root, msg, '']);
+    node.highlighted = false;
+    splay(node);
+    let r = new Node(
+      key,
+      1,
+      posY + 40,
+      node,
+      'right'
+    );
+    if(node.right) {
+      node.right.parent = r;
+      r.right = node.right;
+    }
+    node.right = r;
+    splay(r);
+    return;
+  }
+
+
+  else if (key < node.data) {
+    msg = key + ' < ' + node.data + '. Looking at left subtree.';
+    self.postMessage([root, msg, '']);
+    sleep(delay);
+    node.highlighted = false;
+    return insert(node.left, key, posY + 40);
+  }
+
+  else if (key > node.data) {
+    msg = key + ' > ' + node.data + '. Looking at right subtree.';
+    self.postMessage([root, msg, '']);
+    sleep(delay);
+    node.highlighted = false;
+    return insert(node.right, key, posY + 40);
+  }
+
+  else { //duplicate key, so update the value
+    msg = 'Found a duplicated node. Inserted.';
+    self.postMessage([root, msg, '']);
+    node.highlighted = false;
+    splay(node);
+    return;
+  }
+
 }
 
 // AFTER INSERT OR DELETE, ALWAYS UPDATE ALL NODES POSITION IN THE CANVAS
@@ -473,6 +691,16 @@ self.addEventListener('message', (event) => {
       self.postMessage([root, msg, 'Finished']); // let main thread know that operation has finished
       break;
     }
+    case 'InsertSplay': {
+      lastState = treeClone(root); // save last state of the tree before inserting
+      const value = event.data[1]; // get value from user input
+      canvasWidth = event.data[2]; // get canvasWidth from main thread. Important for node positioning
+      insert(root, value, 50, null); // push it
+      updatePosition(root); // update all node position
+      unhighlightAll(root); // unhighlight all nodes
+      self.postMessage([root, msg, 'Finished']); // let main thread know that operation has finished
+      break;
+    }
     case 'Delete': {
       lastState = treeClone(root); // save last state of the tree before deleting
       const key = event.data[1]; // get value from user input
@@ -487,16 +715,29 @@ self.addEventListener('message', (event) => {
       }
       break;
     }
+    case 'DeleteSplay': {
+      lastState = treeClone(root); // save last state of the tree before deleting
+      const key = event.data[1]; // get value from user input
+      if (root == null) {
+        self.postMessage([root, 'Tree is empty', 'Finished']); // send message to main thread that the tree is empty
+      }
+      else {
+        root = deleteKey(root, key); // delete it
+        updatePosition(root); // update the node position
+        unhighlightAll(root); // unhighlight all nodes
+        self.postMessage([root, msg, 'Finished']); // let main thread know that operation has finished
+      }
+      break;
+    }
     case 'Find': {
       const key = event.data[1]; // get value from user input
       if (root == null) {
         self.postMessage([root, 'Tree is empty', 'Finished']); // send message to main thread that the tree is empty
       }
       else {
-        //search(root, key);
-        root = findSplay(root, key);
+        lastState = treeClone(root); // save last state of the tree before searching
+        search(root, key);
         updatePosition(root);
-        console.log(root.data);
         unhighlightAll(root); // unhighlight all nodes
         self.postMessage([root, msg, 'Finished']); // let main thread know that operation has finished
       }
@@ -536,7 +777,7 @@ self.addEventListener('message', (event) => {
       break;
     }
     case 'Undo': {
-      root = treeClone(lastState); // replace contents of current tree with the last tree state before deletion/insertion happened
+      root = treeClone(lastState); // replace contents of current tree with the last tree state
       updatePosition(root); // update node position
       self.postMessage([root, '', 'Finished']); // let main thread know that operation has finished
       break;

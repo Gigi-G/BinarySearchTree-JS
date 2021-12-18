@@ -1,7 +1,8 @@
-body {
+html, body {
 	font: 100% Arial;
 	margin: 0;
 	padding: 0;
+  overflow-x: hidden;
 }
 
 .control-label {
